@@ -1,0 +1,125 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 15, 35, 0.95) 0%,
+    rgba(15, 15, 35, 0.8) 60%,
+    rgba(15, 15, 35, 0) 100%
+  );
+  pointer-events: none; /* let map interactions through */
+  transition: background 0.3s;
+}
+
+[data-theme="light"] .header {
+  background: linear-gradient(
+    to bottom,
+    rgba(240, 234, 224, 0.95) 0%,
+    rgba(240, 234, 224, 0.8) 60%,
+    rgba(240, 234, 224, 0) 100%
+  );
+}
+
+/* Re-enable pointer events on interactive children */
+.header-left,
+.header-right {
+  pointer-events: auto;
+}
+
+/* ── Left side ── */
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.header-title-accent {
+  color: var(--accent);
+}
+
+.header-subtitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+/* ── Right side ── */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reddit-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.25);
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.reddit-badge:hover {
+  background: rgba(255, 107, 53, 0.18);
+  border-color: rgba(255, 107, 53, 0.45);
+  text-decoration: none;
+}
+
+/* ── Theme toggle ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--accent-dim);
+  border-color: var(--border-accent);
+  color: var(--accent);
+}
+
+/* ── Reddit dot ── */
+.reddit-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: blink 2s ease-in-out infinite;
+}
