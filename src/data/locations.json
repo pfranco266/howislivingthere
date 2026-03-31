@@ -2749,8 +2749,8 @@
     "city": "Dagestan",
     "country": "Russia",
     "region": "Europe",
-    "lat": 43.0,
-    "lng": 47.0,
+    "lat": 43,
+    "lng": 47,
     "precision": "region",
     "posts": [
       {
@@ -3266,7 +3266,7 @@
     "country": "United Kingdom",
     "region": "Europe",
     "lat": 56.8,
-    "lng": -5.0,
+    "lng": -5,
     "precision": "region",
     "posts": [
       {
@@ -5430,8 +5430,8 @@
     "city": "Northwest Territories",
     "country": "Canada",
     "region": "Americas",
-    "lat": 65.0,
-    "lng": -118.0,
+    "lat": 65,
+    "lng": -118,
     "precision": "region",
     "posts": [
       {
@@ -5742,7 +5742,7 @@
     "country": "Antarctica",
     "region": "Other",
     "lat": -72.8439,
-    "lng": 0.0,
+    "lng": 0,
     "precision": "city",
     "posts": [
       {
@@ -8639,8 +8639,8 @@
     "city": "Falkland Islands",
     "country": "United Kingdom",
     "region": "Europe",
-    "lat": 52.7284,
-    "lng": -1.7292,
+    "lat": -51.796,
+    "lng": -59.524,
     "precision": "region",
     "posts": [
       {
@@ -13730,7 +13730,7 @@
     "country": "Antarctica",
     "region": "Other",
     "lat": -72.8439,
-    "lng": 0.0,
+    "lng": 0,
     "precision": "region",
     "posts": [
       {
@@ -25404,8 +25404,8 @@
     "city": "Southwest Egypt",
     "country": "Egypt",
     "region": "Africa",
-    "lat": 40.1348,
-    "lng": -75.4521,
+    "lat": 23,
+    "lng": 28,
     "precision": "region",
     "posts": [
       {
@@ -25776,7 +25776,7 @@
     "country": "Nepal",
     "region": "Asia",
     "lat": 28.378,
-    "lng": 84.0,
+    "lng": 84,
     "precision": "city",
     "posts": [
       {

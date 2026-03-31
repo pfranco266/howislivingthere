@@ -28,6 +28,14 @@ CACHE_FILE = DATA_DIR / "geocode_cache.json"
 # -- Constants ---------------------------------------------------------
 REQUEST_DELAY = 1.5   # Nominatim requires ≤1 req/sec; 1.5s adds buffer
 MAX_RETRIES = 3
+
+# -- Manual overrides for known bad Nominatim results ------------------
+# Key format: "city_lowercase|country_lowercase" (same as cache_key())
+MANUAL_OVERRIDES = {
+    "falkland islands|falkland islands": {"lat": -51.796, "lng": -59.524},
+    "falkland islands|united kingdom":   {"lat": -51.796, "lng": -59.524},
+    "southwest egypt|egypt":             {"lat": 23.0,    "lng": 28.0},
+}
 USER_AGENT = "HowIsLivingThere/1.0 (data visualization project)"
 
 
@@ -74,6 +82,14 @@ def main():
     print(f"\nLoaded {len(posts)} parsed posts.")
 
     cache = load_cache()
+
+    # -- Apply manual overrides to cache (always wins) -----------------
+    for override_key, coords in MANUAL_OVERRIDES.items():
+        if cache.get(override_key) != coords:
+            print(f"  Applying manual override: {override_key} -> {coords}")
+            cache[override_key] = coords
+    save_cache(cache)
+
     geolocator = Nominatim(user_agent=USER_AGENT)
 
     # -- Collect unique city+country pairs -----------------------------
@@ -90,6 +106,9 @@ def main():
     # -- Geocode uncached pairs -----------------------------------------
     for city, country in uncached:
         key = cache_key(city, country)
+        # Skip if a manual override already set this key
+        if key in MANUAL_OVERRIDES:
+            continue
         query_full = f"{city}, {country}" if city and country else (city or country)
         query_country = country or city
 

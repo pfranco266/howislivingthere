@@ -6,6 +6,10 @@
   transition: background 0.15s;
 }
 
+[data-theme="light"] .comment-card {
+  background: var(--comment-card-bg, rgba(0, 0, 0, 0.03));
+}
+
 .comment-card:hover {
   background: var(--border);
 }
@@ -20,19 +24,65 @@
   filter: brightness(1.1);
 }
 
+/* ── Expandable text wrapper ── */
+.comment-text-wrap {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.comment-text-wrap--collapsed {
+  /* nothing needed — fade overlay handles visual cue */
+}
+
 .comment-text {
   font-family: var(--font-body);
   font-size: 12px;
   line-height: 1.6;
   color: var(--text-muted);
-  margin: 0 0 7px;
-  /* Clamp long comments */
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin: 0;
 }
 
+/* Gradient fade at bottom when collapsed */
+.comment-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, var(--bg-panel));
+  pointer-events: none;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+
+.comment-card--first .comment-fade {
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--bg-panel) 85%, var(--accent-dim)));
+}
+
+/* ── Read more / Show less button ── */
+.comment-expand-btn {
+  display: inline-block;
+  margin-bottom: 7px;
+  padding: 2px 0;
+  min-height: 44px; /* tappable target */
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  transition: opacity 0.15s;
+  padding: 0;
+  min-height: 44px;
+}
+
+.comment-expand-btn:hover {
+  opacity: 0.75;
+}
+
+/* ── Meta row ── */
 .comment-meta {
   display: flex;
   align-items: center;
@@ -53,4 +103,20 @@
   color: var(--accent);
   letter-spacing: 0.2px;
   white-space: nowrap;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .comment-card {
+    padding: 14px 14px;
+  }
+
+  .comment-text {
+    font-size: 13px;
+  }
+
+  .comment-expand-btn {
+    font-size: 12px;
+    min-height: 44px;
+  }
 }

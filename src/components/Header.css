@@ -1,3 +1,7 @@
+/* ============================================================
+   Header / Navbar — frosted glass, anchored
+   ============================================================ */
+
 .header {
   position: fixed;
   top: 0;
@@ -5,45 +9,26 @@
   right: 0;
   z-index: 100;
   height: var(--header-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--bg-deep) 82%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+/* ── Brand (left column) ── */
+.header-brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  background: linear-gradient(
-    to bottom,
-    rgba(15, 15, 35, 0.95) 0%,
-    rgba(15, 15, 35, 0.8) 60%,
-    rgba(15, 15, 35, 0) 100%
-  );
-  pointer-events: none; /* let map interactions through */
-  transition: background 0.3s;
-}
-
-[data-theme="light"] .header {
-  background: linear-gradient(
-    to bottom,
-    rgba(240, 234, 224, 0.95) 0%,
-    rgba(240, 234, 224, 0.8) 60%,
-    rgba(240, 234, 224, 0) 100%
-  );
-}
-
-/* Re-enable pointer events on interactive children */
-.header-left,
-.header-right {
-  pointer-events: auto;
-}
-
-/* ── Left side ── */
-.header-left {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
 }
 
 .header-title {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 400;
   color: var(--text);
   letter-spacing: -0.3px;
@@ -55,7 +40,23 @@
   color: var(--accent);
 }
 
-.header-subtitle {
+/* ── Center nav slot (future tabs go here) ── */
+.header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* ── Right controls ── */
+.header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.header-loc-count {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-dim);
@@ -63,19 +64,13 @@
   white-space: nowrap;
 }
 
-/* ── Right side ── */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+/* ── Reddit badge ── */
 .reddit-badge {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 12px;
-  background: rgba(255, 107, 53, 0.1);
+  padding: 5px 11px;
+  background: var(--accent-dim);
   border: 1px solid rgba(255, 107, 53, 0.25);
   border-radius: 20px;
   font-family: var(--font-mono);
@@ -84,12 +79,22 @@
   letter-spacing: 0.3px;
   text-decoration: none;
   transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
 }
 
 .reddit-badge:hover {
-  background: rgba(255, 107, 53, 0.18);
+  background: rgba(255, 107, 53, 0.22);
   border-color: rgba(255, 107, 53, 0.45);
   text-decoration: none;
+}
+
+.reddit-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: blink 2s ease-in-out infinite;
 }
 
 /* ── Theme toggle ── */
@@ -97,13 +102,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
   flex-shrink: 0;
 }
@@ -114,12 +121,49 @@
   color: var(--accent);
 }
 
-/* ── Reddit dot ── */
-.reddit-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
-  animation: blink 2s ease-in-out infinite;
+/* ============================================================
+   Mobile responsive
+   ============================================================ */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 14px;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "brand controls";
+  }
+
+  .header-brand {
+    grid-area: brand;
+  }
+
+  .header-nav {
+    display: none;
+  }
+
+  .header-controls {
+    grid-area: controls;
+    gap: 8px;
+  }
+
+  .header-title {
+    font-size: 17px;
+  }
+
+  .header-loc-count {
+    display: none;
+  }
+
+  .reddit-badge-text {
+    display: none;
+  }
+
+  .reddit-badge {
+    padding: 5px 8px;
+    gap: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .reddit-badge {
+    display: none;
+  }
 }

@@ -3,10 +3,12 @@ import Map, { Source, Layer, Popup, NavigationControl } from 'react-map-gl/mapbo
 import 'mapbox-gl/dist/mapbox-gl.css'
 import CommentCard from './CommentCard'
 import HintBar from './HintBar'
+import BottomSheet from './BottomSheet'
 import locations from '../data/locations.json'
 import './MapView.css'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
+const MOBILE_BREAKPOINT = 768
 
 // Build GeoJSON from locations data
 const geojson = {
@@ -87,7 +89,7 @@ const FOG_DARK = {
 }
 
 const FOG_LIGHT = {
-  color: 'rgb(240, 234, 224)',
+  color: 'rgb(245, 240, 235)',
   'high-color': 'rgb(200, 215, 230)',
   'horizon-blend': 0.05,
   'space-color': 'rgb(180, 200, 220)',
@@ -102,10 +104,22 @@ const INITIAL_VIEW = {
   bearing: 0,
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= MOBILE_BREAKPOINT)
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
 export default function MapView({ theme = 'dark' }) {
   const mapRef = useRef(null)
   const rotationRef = useRef(null)
   const idleTimerRef = useRef(null)
+  const isMobile = useIsMobile()
 
   const [viewState, setViewState] = useState(INITIAL_VIEW)
   const [popupInfo, setPopupInfo] = useState(null) // { location, lng, lat }
@@ -144,7 +158,6 @@ export default function MapView({ theme = 'dark' }) {
     if (isUserInteracting) {
       stopRotation()
     } else {
-      // Resume after 3s idle
       idleTimerRef.current = setTimeout(() => {
         if (viewState.zoom < 4) startRotation()
       }, 3000)
@@ -202,14 +215,13 @@ export default function MapView({ theme = 'dark' }) {
       return
     }
 
-    // Marker click → find location data and open popup
+    // Marker click → find location data and open popup/sheet
     const locId = feature.properties.id
     const location = locations.find((l) => l.id === locId)
     if (!location) return
 
     const [lng, lat] = feature.geometry.coordinates.slice()
 
-    // Fly to marker
     map.flyTo({
       center: [lng, lat],
       zoom: Math.max(map.getZoom(), 4),
@@ -220,7 +232,7 @@ export default function MapView({ theme = 'dark' }) {
     setPopupInfo({ location, lng, lat })
   }, [])
 
-  // Cursor management
+  // Cursor management (desktop only)
   const handleMouseEnter = useCallback(() => {
     const map = mapRef.current?.getMap()
     if (map) map.getCanvas().style.cursor = 'pointer'
@@ -231,9 +243,9 @@ export default function MapView({ theme = 'dark' }) {
     if (map) map.getCanvas().style.cursor = ''
   }, [])
 
-  // ── Popup content ─────────────────────────────────────────
+  // ── Desktop Popup content ─────────────────────────────────
   const renderPopup = () => {
-    if (!popupInfo) return null
+    if (!popupInfo || isMobile) return null
     const { location, lng, lat } = popupInfo
     const totalUpvotes = location.posts.reduce((s, p) => s + p.upvotes, 0)
     const allComments = location.posts.flatMap((p) => p.comments)
@@ -343,7 +355,12 @@ export default function MapView({ theme = 'dark' }) {
         {renderPopup()}
       </Map>
 
-      <HintBar mapInteracted={mapInteracted} />
+      {/* Mobile bottom sheet */}
+      {isMobile && popupInfo && (
+        <BottomSheet locationInfo={popupInfo} onClose={() => setPopupInfo(null)} />
+      )}
+
+      <HintBar mapInteracted={mapInteracted} isMobile={isMobile} />
     </div>
   )
 }

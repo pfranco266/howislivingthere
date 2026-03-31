@@ -34,17 +34,18 @@
    Light Mode Variables
    ============================================================ */
 [data-theme="light"] {
-  --bg-deep: #F0EAE0;
-  --bg-mid: #E8E0D4;
-  --bg-panel: #FDFAF6;
-  --accent: #E8531A;
-  --accent-dim: rgba(232, 83, 26, 0.12);
-  --accent-glow: rgba(232, 83, 26, 0.35);
+  --bg-deep: #F5F0EB;
+  --bg-mid: #EDE7DF;
+  --bg-panel: #FFFFFF;
+  --accent: #FF6B35;
+  --accent-dim: rgba(255, 107, 53, 0.12);
+  --accent-glow: rgba(255, 107, 53, 0.3);
   --text: #1a1a2e;
-  --text-muted: rgba(26, 26, 46, 0.55);
+  --text-muted: rgba(26, 26, 46, 0.5);
   --text-dim: rgba(26, 26, 46, 0.35);
-  --border: rgba(26, 26, 46, 0.1);
-  --border-accent: rgba(232, 83, 26, 0.35);
+  --border: rgba(26, 26, 46, 0.08);
+  --border-accent: rgba(255, 107, 53, 0.35);
+  --comment-card-bg: rgba(0, 0, 0, 0.03);
 }
 
 /* ============================================================

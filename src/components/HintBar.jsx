@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './HintBar.css'
 
-function HintBar({ mapInteracted }) {
+function HintBar({ mapInteracted, isMobile }) {
   const [visible, setVisible] = useState(true)
   const [fading, setFading] = useState(false)
 
@@ -18,7 +18,9 @@ function HintBar({ mapInteracted }) {
   return (
     <div className={`hint-bar ${fading ? 'hint-bar--fade' : ''}`}>
       <span className="hint-text">
-        scroll to zoom &nbsp;·&nbsp; click a marker to explore
+        {isMobile
+          ? 'pinch to zoom \u00b7 tap a marker to explore'
+          : 'scroll to zoom \u00b7 click a marker to explore'}
       </span>
     </div>
   )

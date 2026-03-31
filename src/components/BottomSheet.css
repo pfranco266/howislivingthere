@@ -1,0 +1,194 @@
+/* ============================================================
+   Mobile Bottom Sheet Drawer
+   ============================================================ */
+
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.35);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.bottom-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62vh;
+  min-height: 320px;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInUp 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Drag handle */
+.bottom-sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+
+/* Close button */
+.bottom-sheet-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.bottom-sheet-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* Header */
+.bottom-sheet-header {
+  padding: 8px 48px 12px 20px;
+  flex-shrink: 0;
+}
+
+.bottom-sheet-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.bottom-sheet-city {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+  letter-spacing: -0.3px;
+}
+
+.bottom-sheet-upvotes {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #fff;
+  background: var(--accent);
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+[data-theme="light"] .bottom-sheet-upvotes {
+  color: #fff;
+}
+
+.bottom-sheet-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bottom-sheet-country {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.bottom-sheet-subreddit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+
+/* Divider */
+.bottom-sheet-divider {
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* Comments header (outside scroll) */
+.bottom-sheet-comments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 4px;
+  flex-shrink: 0;
+}
+
+.bottom-sheet-comments-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bottom-sheet-comments-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* Scrollable comments area */
+.bottom-sheet-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+}
+
+.bottom-sheet-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px 24px;
+}
+
+/* Footer */
+.bottom-sheet-footer {
+  padding: 10px 20px 16px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+
+.bottom-sheet-reddit-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.bottom-sheet-reddit-link:hover {
+  opacity: 0.75;
+  text-decoration: none;
+}
