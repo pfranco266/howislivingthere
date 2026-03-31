@@ -123,19 +123,28 @@ def build_location(city, country, precision, lat, lng, posts_data):
     # Sort posts by upvotes descending
     posts_data.sort(key=lambda p: p["score"], reverse=True)
 
+    # Track seen comment IDs across all posts for this location to avoid duplicates
+    seen_comment_ids = set()
+
     posts_out = []
     for post in posts_data:
-        # Sort comments by score descending, keep top 5
+        # Sort comments by score descending, deduplicate by redditId, keep top N
         comments_sorted = sorted(post.get("comments", []), key=lambda c: c["score"], reverse=True)
-        comments_out = [
-            {
+        comments_out = []
+        for c in comments_sorted:
+            comment_id = c.get("id")
+            if comment_id and comment_id in seen_comment_ids:
+                continue
+            if comment_id:
+                seen_comment_ids.add(comment_id)
+            comments_out.append({
                 "text": c["body"],
                 "score": c["score"],
                 "author": c["author"],
-                "redditId": c["id"],
-            }
-            for c in comments_sorted[:MAX_COMMENTS_PER_POST]
-        ]
+                "redditId": comment_id,
+            })
+            if len(comments_out) >= MAX_COMMENTS_PER_POST:
+                break
 
         posts_out.append({
             "redditId": post["id"],

@@ -2,6 +2,9 @@
 Step 2: Parse city/country from post titles using Claude API.
 Batches titles in groups of 15 to minimise API calls.
 
+Supports incremental updates: skips posts already present in
+parsed_locations.json and only sends new titles to Claude.
+
 Input:  data/raw/posts.json
 Output: data/raw/parsed_locations.json
 """
@@ -107,20 +110,40 @@ def main():
         print(f"Error: {INPUT_FILE} not found. Run scrape_reddit.py first.")
         sys.exit(1)
 
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("VITE_ANTHROPIC_API_KEY")
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY not set in .env")
+        print("Error: ANTHROPIC_API_KEY (or VITE_ANTHROPIC_API_KEY) not set in .env")
         sys.exit(1)
 
     with open(INPUT_FILE, encoding="utf-8") as f:
-        posts = json.load(f)
+        all_posts = json.load(f)
 
-    print(f"\nLoaded {len(posts)} posts.")
+    print(f"\nLoaded {len(all_posts)} posts from posts.json.")
+
+    # -- Load existing parsed results ----------------------------------
+    existing_parsed = []
+    parsed_ids = set()
+    if OUTPUT_FILE.exists():
+        with open(OUTPUT_FILE, encoding="utf-8") as f:
+            existing_parsed = json.load(f)
+        parsed_ids = {p["id"] for p in existing_parsed}
+
+    # -- Filter to only new posts --------------------------------------
+    new_posts = [p for p in all_posts if p["id"] not in parsed_ids]
+    print(f"{len(parsed_ids)} posts already parsed, {len(new_posts)} new posts to parse.")
+
+    if not new_posts:
+        print("Nothing to parse -- all posts already have locations.")
+        # Write existing data so downstream steps don't fail on missing file
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            json.dump(existing_parsed, f, ensure_ascii=False, indent=2)
+        print(f"  Wrote {len(existing_parsed)} existing entries to {OUTPUT_FILE}")
+        return
 
     client = anthropic.Anthropic(api_key=api_key)
 
     # -- Batch titles --------------------------------------------------
-    titles = [p["title"] for p in posts]
+    titles = [p["title"] for p in new_posts]
     batches = [titles[i: i + BATCH_SIZE] for i in range(0, len(titles), BATCH_SIZE)]
     total_batches = len(batches)
 
@@ -142,11 +165,11 @@ def main():
                 print(f"  Skipped (no location): {title[:70]}")
         all_parsed.extend(results)
 
-    # -- Merge with post data ------------------------------------------
-    results_with_posts = []
+    # -- Merge parsed results with new post data -----------------------
+    new_with_locations = []
     skipped = 0
 
-    for post, loc in zip(posts, all_parsed):
+    for post, loc in zip(new_posts, all_parsed):
         city = loc.get("city")
         country = loc.get("country")
 
@@ -155,19 +178,21 @@ def main():
             skipped += 1
             continue
 
-        results_with_posts.append({
+        new_with_locations.append({
             **post,
             "city": city,
             "country": country,
             "precision": loc.get("precision"),
         })
 
-    # -- Save ----------------------------------------------------------
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump(results_with_posts, f, ensure_ascii=False, indent=2)
+    # -- Merge with existing and save ----------------------------------
+    merged = existing_parsed + new_with_locations
 
-    print(f"\n✓ Parsed {len(results_with_posts)} posts with locations.")
-    print(f"  Skipped {skipped} posts (no location found).")
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(merged, f, ensure_ascii=False, indent=2)
+
+    print(f"\n✓ Parsed {len(new_with_locations)} new posts with locations ({skipped} skipped, no location found).")
+    print(f"  Total parsed posts: {len(merged)}")
     print(f"  Saved to {OUTPUT_FILE}")
 
 
