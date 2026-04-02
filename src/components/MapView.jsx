@@ -27,6 +27,21 @@ const geojson = {
 }
 
 // Layer styles
+const pulseRingLayer = {
+  id: 'pulse-ring',
+  type: 'circle',
+  source: 'locations',
+  filter: ['!', ['has', 'point_count']],
+  paint: {
+    'circle-color': '#FF6B35',
+    'circle-radius': 14,
+    'circle-opacity': 0,
+    'circle-stroke-width': 2,
+    'circle-stroke-color': '#FF6B35',
+    'circle-stroke-opacity': 0.4,
+  },
+}
+
 const clusterLayer = {
   id: 'clusters',
   type: 'circle',
@@ -96,6 +111,9 @@ const FOG_LIGHT = {
   'star-intensity': 0.0,
 }
 
+const MAP_STYLE_DARK  = 'mapbox://styles/mapbox/dark-v11'
+const MAP_STYLE_LIGHT = 'mapbox://styles/mapbox/outdoors-v12'
+
 const INITIAL_VIEW = {
   longitude: 10,
   latitude: 20,
@@ -119,10 +137,11 @@ export default function MapView({ theme = 'dark' }) {
   const mapRef = useRef(null)
   const rotationRef = useRef(null)
   const idleTimerRef = useRef(null)
+  const pulseFrameRef = useRef(null)
   const isMobile = useIsMobile()
 
   const [viewState, setViewState] = useState(INITIAL_VIEW)
-  const [popupInfo, setPopupInfo] = useState(null) // { location, lng, lat }
+  const [popupInfo, setPopupInfo] = useState(null)
   const [isUserInteracting, setIsUserInteracting] = useState(false)
   const [mapInteracted, setMapInteracted] = useState(false)
   const [mapLoaded, setMapLoaded] = useState(false)
@@ -145,7 +164,6 @@ export default function MapView({ theme = 'dark' }) {
     }
   }, [])
 
-  // Start rotating once map loads
   useEffect(() => {
     if (mapLoaded) {
       const t = setTimeout(startRotation, 800)
@@ -153,7 +171,6 @@ export default function MapView({ theme = 'dark' }) {
     }
   }, [mapLoaded, startRotation])
 
-  // Stop/resume rotation on interaction
   useEffect(() => {
     if (isUserInteracting) {
       stopRotation()
@@ -165,16 +182,31 @@ export default function MapView({ theme = 'dark' }) {
     return () => clearTimeout(idleTimerRef.current)
   }, [isUserInteracting, stopRotation, startRotation, viewState.zoom])
 
-  // Stop rotation when zoomed in
   useEffect(() => {
     if (viewState.zoom >= 4) stopRotation()
   }, [viewState.zoom, stopRotation])
 
-  // Cleanup on unmount
   useEffect(() => () => {
     stopRotation()
     clearTimeout(idleTimerRef.current)
   }, [stopRotation])
+
+  // ── Pulse ring animation ──────────────────────────────────
+  useEffect(() => {
+    if (!mapLoaded) return
+    const animate = () => {
+      const map = mapRef.current?.getMap()
+      if (map && map.getLayer('pulse-ring')) {
+        const t = Date.now() / 1000
+        const phase = 0.5 + 0.5 * Math.sin(t * 1.8)
+        map.setPaintProperty('pulse-ring', 'circle-stroke-opacity', 0.15 + 0.3 * phase)
+        map.setPaintProperty('pulse-ring', 'circle-radius', 10 + 6 * phase)
+      }
+      pulseFrameRef.current = requestAnimationFrame(animate)
+    }
+    pulseFrameRef.current = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(pulseFrameRef.current)
+  }, [mapLoaded])
 
   // ── Interaction handlers ──────────────────────────────────
   const handleInteractionStart = () => {
@@ -182,9 +214,7 @@ export default function MapView({ theme = 'dark' }) {
     setMapInteracted(true)
   }
 
-  const handleInteractionEnd = () => {
-    setIsUserInteracting(false)
-  }
+  const handleInteractionEnd = () => setIsUserInteracting(false)
 
   const handleClick = useCallback((e) => {
     const map = mapRef.current?.getMap()
@@ -201,7 +231,6 @@ export default function MapView({ theme = 'dark' }) {
 
     const feature = features[0]
 
-    // Cluster click → zoom to expand
     if (feature.layer.id === 'clusters') {
       const clusterId = feature.properties.cluster_id
       map.getSource('locations').getClusterExpansionZoom(clusterId, (err, zoom) => {
@@ -209,13 +238,12 @@ export default function MapView({ theme = 'dark' }) {
         map.easeTo({
           center: feature.geometry.coordinates,
           zoom: zoom + 0.5,
-          duration: 600,
+          duration: 700,
         })
       })
       return
     }
 
-    // Marker click → find location data and open popup/sheet
     const locId = feature.properties.id
     const location = locations.find((l) => l.id === locId)
     if (!location) return
@@ -225,14 +253,14 @@ export default function MapView({ theme = 'dark' }) {
     map.flyTo({
       center: [lng, lat],
       zoom: Math.max(map.getZoom(), 4),
-      duration: 800,
+      duration: 1200,
+      curve: 1.4,
       essential: true,
     })
 
     setPopupInfo({ location, lng, lat })
   }, [])
 
-  // Cursor management (desktop only)
   const handleMouseEnter = useCallback(() => {
     const map = mapRef.current?.getMap()
     if (map) map.getCanvas().style.cursor = 'pointer'
@@ -243,16 +271,13 @@ export default function MapView({ theme = 'dark' }) {
     if (map) map.getCanvas().style.cursor = ''
   }, [])
 
-  // ── Desktop Popup content ─────────────────────────────────
+  // ── Desktop Popup ─────────────────────────────────────────
   const renderPopup = () => {
     if (!popupInfo || isMobile) return null
     const { location, lng, lat } = popupInfo
     const totalUpvotes = location.posts.reduce((s, p) => s + p.upvotes, 0)
     const allComments = location.posts.flatMap((p) => p.comments)
-    const totalComments = allComments.length
-    const topComments = [...allComments]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20)
+    const topComments = [...allComments].sort((a, b) => b.score - a.score).slice(0, 20)
     const topPost = location.posts[0]
 
     return (
@@ -263,10 +288,9 @@ export default function MapView({ theme = 'dark' }) {
         offset={14}
         onClose={() => setPopupInfo(null)}
         closeOnClick={false}
-        maxWidth="340px"
+        maxWidth="360px"
       >
         <div className="popup-inner">
-          {/* Header */}
           <div className="popup-header">
             <div className="popup-title-row">
               <h2 className="popup-city">{location.city}</h2>
@@ -280,12 +304,11 @@ export default function MapView({ theme = 'dark' }) {
 
           <div className="popup-divider" />
 
-          {/* Comments */}
           <div className="popup-comments-section">
             <div className="popup-comments-header">
               <p className="popup-comments-label">Top Comments</p>
               <span className="popup-comments-count">
-                showing {topComments.length} of {totalComments}
+                showing {topComments.length} of {allComments.length}
               </span>
             </div>
             <div className="popup-comments-list">
@@ -295,7 +318,6 @@ export default function MapView({ theme = 'dark' }) {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="popup-footer">
             <a
               href={topPost?.url || '#'}
@@ -313,6 +335,11 @@ export default function MapView({ theme = 'dark' }) {
 
   return (
     <div className="map-wrapper">
+      {/* Loading indicator */}
+      <div className={`map-loading ${mapLoaded ? 'map-loading--hidden' : ''}`}>
+        <div className="map-loading-dot" />
+      </div>
+
       <Map
         ref={mapRef}
         {...viewState}
@@ -327,7 +354,7 @@ export default function MapView({ theme = 'dark' }) {
         onZoomEnd={handleInteractionEnd}
         onClick={handleClick}
         onLoad={() => setMapLoaded(true)}
-        mapStyle={theme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11'}
+        mapStyle={theme === 'dark' ? MAP_STYLE_DARK : MAP_STYLE_LIGHT}
         mapboxAccessToken={MAPBOX_TOKEN}
         projection="globe"
         fog={theme === 'dark' ? FOG_DARK : FOG_LIGHT}
@@ -347,6 +374,7 @@ export default function MapView({ theme = 'dark' }) {
           clusterMaxZoom={8}
           clusterRadius={50}
         >
+          <Layer {...pulseRingLayer} />
           <Layer {...clusterLayer} />
           <Layer {...clusterCountLayer} />
           <Layer {...unclusteredPointLayer} />
@@ -355,7 +383,6 @@ export default function MapView({ theme = 'dark' }) {
         {renderPopup()}
       </Map>
 
-      {/* Mobile bottom sheet */}
       {isMobile && popupInfo && (
         <BottomSheet locationInfo={popupInfo} onClose={() => setPopupInfo(null)} />
       )}

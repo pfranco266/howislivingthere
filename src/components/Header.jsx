@@ -4,14 +4,15 @@ import './Header.css'
 function Header({ theme, onToggleTheme }) {
   return (
     <header className="header">
-      {/* Brand mark */}
+      {/* Brand */}
       <div className="header-brand">
+        <span className="header-brand-icon" aria-hidden="true">🌍</span>
         <h1 className="header-title">
           How Is Living There<span className="header-title-accent">?</span>
         </h1>
       </div>
 
-      {/* Center nav slot — empty in V1, accommodates tabs in V2 */}
+      {/* Center nav slot — empty in V1, ready for tabs in V2 */}
       <nav className="header-nav" aria-label="Main navigation" />
 
       {/* Right controls */}

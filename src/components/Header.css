@@ -1,5 +1,5 @@
 /* ============================================================
-   Header / Navbar — frosted glass, anchored
+   Header / Navbar — Linear / Vercel-inspired
    ============================================================ */
 
 .header {
@@ -12,40 +12,56 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 0 20px;
-  background: color-mix(in srgb, var(--bg-deep) 82%, transparent);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  padding: 0 18px;
+  background: color-mix(in srgb, var(--bg-deep) 85%, transparent);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
   border-bottom: 1px solid var(--border);
-  transition: background 0.3s, border-color 0.3s;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-/* ── Brand (left column) ── */
+/* Light mode gets a shadow instead of just a border */
+[data-theme="light"] .header {
+  box-shadow: 0 1px 0 var(--border), 0 4px 24px rgba(26, 26, 46, 0.07);
+}
+
+/* ── Brand ── */
 .header-brand {
   display: flex;
   align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.header-brand-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 .header-title {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
   color: var(--text);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
   line-height: 1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-title-accent {
   color: var(--accent);
 }
 
-/* ── Center nav slot (future tabs go here) ── */
+/* ── Center nav slot ── */
 .header-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 /* ── Right controls ── */
@@ -53,44 +69,47 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 .header-loc-count {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-dim);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
+  padding: 3px 8px;
+  background: var(--border);
+  border-radius: 20px;
 }
 
 /* ── Reddit badge ── */
 .reddit-badge {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 11px;
+  gap: 6px;
+  padding: 4px 10px;
   background: var(--accent-dim);
-  border: 1px solid rgba(255, 107, 53, 0.25);
-  border-radius: 20px;
+  border: 1px solid rgba(255, 107, 53, 0.22);
+  border-radius: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--accent);
   letter-spacing: 0.3px;
   text-decoration: none;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
 
 .reddit-badge:hover {
-  background: rgba(255, 107, 53, 0.22);
-  border-color: rgba(255, 107, 53, 0.45);
+  background: rgba(255, 107, 53, 0.2);
+  border-color: rgba(255, 107, 53, 0.4);
   text-decoration: none;
 }
 
 .reddit-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
@@ -102,16 +121,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
 
@@ -122,48 +141,27 @@
 }
 
 /* ============================================================
-   Mobile responsive
+   Mobile
    ============================================================ */
 @media (max-width: 768px) {
   .header {
-    padding: 0 14px;
+    padding: 0 12px;
     grid-template-columns: 1fr auto;
     grid-template-areas: "brand controls";
   }
 
-  .header-brand {
-    grid-area: brand;
-  }
+  .header-brand { grid-area: brand; }
+  .header-nav   { display: none; }
+  .header-controls { grid-area: controls; gap: 6px; }
 
-  .header-nav {
-    display: none;
-  }
+  .header-title { font-size: 16px; }
+  .header-brand-icon { font-size: 16px; }
+  .header-loc-count { display: none; }
 
-  .header-controls {
-    grid-area: controls;
-    gap: 8px;
-  }
-
-  .header-title {
-    font-size: 17px;
-  }
-
-  .header-loc-count {
-    display: none;
-  }
-
-  .reddit-badge-text {
-    display: none;
-  }
-
-  .reddit-badge {
-    padding: 5px 8px;
-    gap: 0;
-  }
+  .reddit-badge-text { display: none; }
+  .reddit-badge { padding: 4px 7px; gap: 0; border-radius: 6px; }
 }
 
 @media (max-width: 480px) {
-  .reddit-badge {
-    display: none;
-  }
+  .reddit-badge { display: none; }
 }
